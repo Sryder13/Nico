@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.5.1"
+local version = "v0.6.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -16,6 +16,7 @@ My commands are:
 &help - displays this text
 &info - display bot info
 &source - show a link to my source
+&whoami - displays your user info
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
 &roll <x> d<y> - roll x number of y sided dice
@@ -34,6 +35,11 @@ local function die()
 	-- So this'll set it to be Idle while it's dead
 	client:setStatusIdle()
 	client:stop(true)
+end
+
+local function simpleDiscordTime(timeString)
+	return string.match(timeString, "(%d+%-%d+%-%d+)") .. " "
+	.. string.match(timeString, "%d+%-%d+%-%d+T(%d+:%d+:%d+)")
 end
 
 
@@ -65,6 +71,15 @@ end
 
 local function commandSource(message)
 	message.channel:sendMessage("My source is located at: <https://github.com/Sryder13/Nico>")
+end
+
+local function commandWhoAmI(message)
+	local text = "User: `"
+	text = text .. message.author.name .. "#" .. message.author.discriminator .. "`\n"
+	.. "ID: `"  .. message.author.id .. "`\n"
+	.. "Account Created: `" .. simpleDiscordTime(message.author.timestamp) .. "`"
+
+	message.channel:sendMessage(text)
 end
 
 local function commandSay(message)
@@ -130,6 +145,7 @@ end
 local commands = {	["&help"] = commandHelp, 
 			["&info"] = commandInfo,
 			["&source"] = commandSource,
+			["&whoami"] = commandWhoAmI,
 			["&say"] = commandSay,
 			["&sayy"] = commandSayy,
 			["&roll"] = commandRoll,
