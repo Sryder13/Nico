@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.5.0"
+local version = "v0.5.1"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -136,6 +136,11 @@ local commands = {	["&help"] = commandHelp,
 			["&die"] = commandDie}
 
 local function messageGrabs(message)
+	-- Don't do any of this for yourself
+	if message.author == client.user then
+		return
+	end
+
 	-- Okay, this is a little confusing, basically the above table stores function names
 	-- with the user input to run it as a key, we just check that they key exists and run
 	-- the function for it directly
