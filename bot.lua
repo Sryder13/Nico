@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "0.2.0"
+local version = "v0.3.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -16,9 +16,11 @@ My commands are:
 &help - displays this text
 &info - display bot info
 &say - say something in the channel
+&sayy - say something a e s t h e t i c a l l y
 &die - stop the bot*
-```
-* can only be run by bot admins]]
+
+* can only be run by bot admins
+```]]
 
 local botAdmins = {["127036555159273472"] = true, ["116883900688629761"] = true}
 
@@ -62,6 +64,15 @@ end
 local function commandSay(message)
 	local text
 	text = string.match(message.content, "%g+ (.+)")
+	message:delete()
+	message.channel:sendMessage(text)
+end
+
+local function commandSayy(message)
+	local text
+	text = string.match(message.content, "%g+ (.+)")
+	text = string.gsub(text, "(.)", "%1 ")
+	message:delete()
 	message.channel:sendMessage(text)
 end
 
@@ -80,6 +91,7 @@ end
 local commands = {	["&help"] = commandHelp, 
 			["&info"] = commandInfo,
 			["&say"] = commandSay,
+			["&sayy"] = commandSayy,
 			["&die"] = commandDie}
 
 local function messageGrabs(message)
