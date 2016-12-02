@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.3.0"
+local version = "v0.4.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -17,6 +17,7 @@ My commands are:
 &info - display bot info
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
+&roll <x> d<y> - roll x number of y sided dice
 &die - stop the bot*
 
 * can only be run by bot admins
@@ -76,6 +77,39 @@ local function commandSayy(message)
 	message.channel:sendMessage(text)
 end
 
+local function commandRoll(message)
+	local num, sides
+	num, sides = string.match(message.content, "%g+ (%d+) d(%d+)")
+	-- convert them to numbers
+	num = tonumber(num)
+	sides = tonumber(sides)
+	if not num or not sides or sides == 0 then
+		message.channel:sendMessage("You did something wrong")
+		return
+	end
+
+	-- It just adds up and formats the output text
+	local die
+	local text = "Rolling " .. num .. " number of " .. sides .. " sided dice:\n"
+	local total = 0
+	for i = 0, num-1, 1 do
+		die = math.random(sides)
+		if num > 1 and num <= 20 then
+			if i > 0 then
+				text = text .. " + "
+			end
+			text = text .. die
+		end
+		total = total + die
+	end
+	if num > 1 and num <= 20 then
+		text = text .. " = " .. total
+	else
+		text = text .. "Result is: " .. total
+	end
+	message.channel:sendMessage(text)
+end
+
 local function commandDie(message)
 	if not botAdmins[message.author.id] then
 		message.channel:sendMessage("You do not have permission to do this")
@@ -92,6 +126,7 @@ local commands = {	["&help"] = commandHelp,
 			["&info"] = commandInfo,
 			["&say"] = commandSay,
 			["&sayy"] = commandSayy,
+			["&roll"] = commandRoll,
 			["&die"] = commandDie}
 
 local function messageGrabs(message)
