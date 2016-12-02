@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.1.0"
+local version = "0.2.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -15,6 +15,7 @@ My commands are:
 ```
 &help - displays this text
 &info - display bot info
+&say - say something in the channel
 &die - stop the bot*
 ```
 * can only be run by bot admins]]
@@ -58,6 +59,12 @@ My admins in this server are: ]]
 	message.channel:sendMessage(text)
 end
 
+local function commandSay(message)
+	local text
+	text = string.match(message.content, "%g+ (.+)")
+	message.channel:sendMessage(text)
+end
+
 local function commandDie(message)
 	if not botAdmins[message.author.id] then
 		message.channel:sendMessage("You do not have permission to do this")
@@ -72,6 +79,7 @@ end
 
 local commands = {	["&help"] = commandHelp, 
 			["&info"] = commandInfo,
+			["&say"] = commandSay,
 			["&die"] = commandDie}
 
 local function messageGrabs(message)
