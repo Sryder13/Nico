@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.4.2"
+local version = "v0.5.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -15,6 +15,7 @@ My commands are:
 ```
 &help - displays this text
 &info - display bot info
+&source - show a link to my source
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
 &roll <x> d<y> - roll x number of y sided dice
@@ -60,6 +61,10 @@ My admins in this server are: ]]
 		end
 	end
 	message.channel:sendMessage(text)
+end
+
+local function commandSource(message)
+	message.channel:sendMessage("My source is located at: <https://github.com/Sryder13/Nico>")
 end
 
 local function commandSay(message)
@@ -124,6 +129,7 @@ end
 
 local commands = {	["&help"] = commandHelp, 
 			["&info"] = commandInfo,
+			["&source"] = commandSource,
 			["&say"] = commandSay,
 			["&sayy"] = commandSayy,
 			["&roll"] = commandRoll,
