@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.4.1"
+local version = "v0.4.2"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -49,7 +49,7 @@ local function commandInfo(message)
 I am version: ]] .. version .. [[
 
 My admins in this server are: ]]
-	
+
 	for user in message.guild.members do
 		if botAdmins[user.id] then
 			if i > 0 then
@@ -135,10 +135,14 @@ local function messageGrabs(message)
 	-- the function for it directly
 	local command = {} 
 	command = string.match(message.content, "%g+") -- get all characters up to the space
-	
+
 	if commands[command] then
 		message.channel:broadcastTyping()
 		commands[command](message)
+	end
+
+	if string.find(string.lower(message.content), "%f[%w]nico%f[^%w]") then
+		message:addReaction("\xF0\x9F\x98\x98")
 	end
 end
 
