@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.7.0"
+local version = "v0.7.1"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -175,7 +175,7 @@ local function messageGrabs(message)
 	-- with the user input to run it as a key, we just check that they key exists and run
 	-- the function for it directly
 	local command = {} 
-	command = string.match(message.content, "%g+") -- get all characters up to the space
+	command = string.lower(string.match(message.content, "%g+")) -- get all characters up to the space
 
 	if commands[command] then
 		message.channel:broadcastTyping()
