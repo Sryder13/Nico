@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.7.1"
+local version = "v0.7.2"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -63,7 +63,7 @@ My admins in this server are: ]]
 			if i > 0 then
 				text = text .. ", "
 			end
-			text = text .. user.username .. " (" .. user.name .. "#" .. user.discriminator .. ")"
+			text = text .. user.name .. " (" .. user.username .. "#" .. user.discriminator .. ")"
 			i = i + 1
 		end
 	end
