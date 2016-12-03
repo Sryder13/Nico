@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.6.0"
+local version = "v0.7.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -17,6 +17,7 @@ My commands are:
 &info - display bot info
 &source - show a link to my source
 &whoami - displays your user info
+&whois - displays another user's info
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
 &roll <x> d<y> - roll x number of y sided dice
@@ -73,13 +74,25 @@ local function commandSource(message)
 	message.channel:sendMessage("My source is located at: <https://github.com/Sryder13/Nico>")
 end
 
-local function commandWhoAmI(message)
-	local text = "User: `"
-	text = text .. message.author.name .. "#" .. message.author.discriminator .. "`\n"
-	.. "ID: `"  .. message.author.id .. "`\n"
-	.. "Account Created: `" .. simpleDiscordTime(message.author.timestamp) .. "`"
+local function commandWhoIs(message)
+	local command = string.lower(string.match(message.content, "%g+"))
+	local arg = string.match(message.content, "%g+ (.+)")
 
-	message.channel:sendMessage(text)
+	if command == "&whoami" or not arg then
+		arg = message.author.username
+	end
+
+	for user in message.guild.members do
+		if user.username == arg or user.name == arg then
+			local text = "User: `" .. user.username .. "#" .. user.discriminator .. "`\n"
+			.. "ID: `"  .. user.id .. "`\n"
+			.. "Account Created: `" .. simpleDiscordTime(user.joinedAt) .. "`"
+			message.channel:sendMessage(text)
+			return
+		end
+	end
+
+	message.channel:sendMessage("I can't find " .. arg)
 end
 
 local function commandSay(message)
@@ -145,7 +158,8 @@ end
 local commands = {	["&help"] = commandHelp, 
 			["&info"] = commandInfo,
 			["&source"] = commandSource,
-			["&whoami"] = commandWhoAmI,
+			["&whoami"] = commandWhoIs, -- It's an alias
+			["&whois"] = commandWhoIs,
 			["&say"] = commandSay,
 			["&sayy"] = commandSayy,
 			["&roll"] = commandRoll,
