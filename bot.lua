@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.7.3"
+local version = "v0.8.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -18,6 +18,7 @@ My commands are:
 &source - show a link to my source
 &whoami - displays your user info
 &whois - displays another user's info
+&randomuser - gives you a random user of the current server
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
 &roll <x> d<y> - roll x number of y sided dice
@@ -95,6 +96,25 @@ local function commandWhoIs(message)
 	message.channel:sendMessage("I can't find " .. arg)
 end
 
+local function commandRandomUser(message)
+	local i = 0
+	local text = "Your random user is: "
+	if not message.channel.guild then
+		message.channel:sendMessage("This does not work for PM's silly.")
+		return
+	end
+	local userNum = math.random(message.channel.guild.memberCount)-1
+	for user in message.guild.members do
+		if i == userNum then
+			text = text .. user.name
+			break
+		end
+	i = i + 1
+	end
+
+	message.channel:sendMessage(text)
+end
+
 local function commandSay(message)
 	local text
 	text = string.match(message.content, "%g+ (.+)")
@@ -160,6 +180,7 @@ local commands = {	["&help"] = commandHelp,
 			["&source"] = commandSource,
 			["&whoami"] = commandWhoIs, -- It's an alias
 			["&whois"] = commandWhoIs,
+			["&randomuser"] = commandRandomUser,
 			["&say"] = commandSay,
 			["&sayy"] = commandSayy,
 			["&roll"] = commandRoll,
