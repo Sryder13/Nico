@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.8.2"
+local version = "v0.8.3"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -126,7 +126,9 @@ end
 local function commandSay(message)
 	local text
 	text = string.match(message.content, "%g+ (.+)")
-	message:delete()
+	if message.guild then
+		message:delete()
+	end
 	message.channel:sendMessage(text)
 end
 
@@ -134,7 +136,9 @@ local function commandSayy(message)
 	local text
 	text = string.match(message.content, "%g+ (.+)")
 	text = string.gsub(text, "(.)", "%1 ")
-	message:delete()
+	if message.guild then
+		message:delete()
+	end
 	message.channel:sendMessage(text)
 end
 
