@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.8.1"
+local version = "v0.8.2"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -79,19 +79,26 @@ end
 local function commandWhoIs(message)
 	local command = string.lower(string.match(message.content, "%g+"))
 	local arg = string.match(message.content, "%g+ (.+)")
+	local checkUser
 
-	if command == "&whoami" or not arg then
-		arg = message.author.username
+	if command == "&whoami" or not arg or not message.guild then
+		checkUser = message.author
 	end
 
-	for user in message.guild.members do
-		if user.username == arg or user.name == arg then
-			local text = "User: `" .. user.username .. "#" .. user.discriminator .. "`\n"
-			.. "ID: `"  .. user.id .. "`\n"
-			.. "Account Created: `" .. simpleDiscordTime(user.joinedAt) .. "`"
-			message.channel:sendMessage(text)
-			return
+	if not checkUser then -- we aren't just using the author so go through guild
+		for user in message.guild.members do
+			if user.username == arg or user.name == arg then
+				checkUser = user
+				break
+			end
 		end
+	end
+	if checkUser then -- found them, print the info
+		local text = "User: `" .. checkUser.username .. "#" .. checkUser.discriminator .. "`\n"
+		.. "ID: `"  .. checkUser.id .. "`\n"
+		.. "Account Created: `" .. simpleDiscordTime(checkUser.timestamp) .. "`"
+		message.channel:sendMessage(text)
+		return
 	end
 
 	message.channel:sendMessage("I can't find " .. arg)
