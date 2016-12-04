@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.8.3"
+local version = "v0.8.4"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -124,18 +124,11 @@ local function commandRandomUser(message)
 end
 
 local function commandSay(message)
-	local text
-	text = string.match(message.content, "%g+ (.+)")
-	if message.guild then
-		message:delete()
+	local command, text = string.match(message.content, "(%g+) (.+)")
+	if string.lower(command) == "&sayy" then
+		text = string.gsub(text, "(.)", "%1 ")
 	end
-	message.channel:sendMessage(text)
-end
 
-local function commandSayy(message)
-	local text
-	text = string.match(message.content, "%g+ (.+)")
-	text = string.gsub(text, "(.)", "%1 ")
 	if message.guild then
 		message:delete()
 	end
@@ -194,7 +187,7 @@ local commands = {	["&help"] = commandHelp,
 			["&whois"] = commandWhoIs,
 			["&randomuser"] = commandRandomUser,
 			["&say"] = commandSay,
-			["&sayy"] = commandSayy,
+			["&sayy"] = commandSay, -- alias
 			["&roll"] = commandRoll,
 			["&die"] = commandDie}
 
