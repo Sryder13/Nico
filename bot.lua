@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.8.4"
+local version = "v0.8.5"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -77,8 +77,7 @@ local function commandSource(message)
 end
 
 local function commandWhoIs(message)
-	local command = string.lower(string.match(message.content, "%g+"))
-	local arg = string.match(message.content, "%g+ (.+)")
+	local command, arg = string.lower(string.match(message.content, "(%g+) (.+)"))
 	local checkUser
 
 	if command == "&whoami" or not arg or not message.guild then
