@@ -7,7 +7,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.8.0"
+local version = "v0.8.1"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -55,17 +55,18 @@ local function commandInfo(message)
 	local i = 0;
 	local text = "I am Nico, a Discord bot written by " .. client.owner.name .. [[
 
-I am version: ]] .. version .. [[
+I am version: ]] .. version
 
-My admins in this server are: ]]
-
-	for user in message.guild.members do
-		if botAdmins[user.id] then
-			if i > 0 then
-				text = text .. ", "
+	if message.guild then
+		text = text .. "\nMy admins in this server are: "
+		for user in message.guild.members do
+			if botAdmins[user.id] then
+				if i > 0 then
+					text = text .. ", "
+				end
+				text = text .. user.name .. " (" .. user.username .. "#" .. user.discriminator .. ")"
+				i = i + 1
 			end
-			text = text .. user.name .. " (" .. user.username .. "#" .. user.discriminator .. ")"
-			i = i + 1
 		end
 	end
 	message.channel:sendMessage(text)
