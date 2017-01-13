@@ -9,7 +9,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.9.0dev"
+local version = "v0.9.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -171,16 +171,16 @@ local function commandRoll(message)
 end
 
 local function commandMarkov(message)
+	if not message.channel.guild then
+		message.channel:sendMessage("This does not work for PM's silly.")
+		return
+	end
+
 	-- arg is the name that was sent in
 	-- target is the server ID + "-" + user ID
 	local arg = string.match(message.content, "%g+ (.+)")
 	local target = message.guild.id .. "-" .. message.author.id
 	local file
-
-	if not message.channel.guild then
-		message.channel:sendMessage("This does not work for PM's silly.")
-		return
-	end
 
 	if arg == "Nico" then
 		message.channel:sendMessage("I would not do this here or there.")
