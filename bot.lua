@@ -1,13 +1,15 @@
 local discordia = require("discordia")
 local client = discordia.Client()
 
+local markov = require("markov")
+
 -- secret.lua should contain "return {token = "TOKEN"}"
 local secrets = require("secret")
 
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.8.5"
+local version = "v0.9.0dev"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -22,6 +24,7 @@ My commands are:
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
 &roll <x> d<y> - roll x number of y sided dice
+&markov [<user>] - generate markov chain over chat history for you or another user
 &die - stop the bot*
 
 * can only be run by bot admins
@@ -167,6 +170,40 @@ local function commandRoll(message)
 	message.channel:sendMessage(text)
 end
 
+local function commandMarkov(message)
+	-- arg is the name that was sent in
+	-- target is the server ID + "-" + user ID
+	local arg = string.match(message.content, "%g+ (.+)")
+	local target = message.guild.id .. "-" .. message.author.id
+	local file
+
+	if not message.channel.guild then
+		message.channel:sendMessage("This does not work for PM's silly.")
+		return
+	end
+
+	if arg == "Nico" then
+		message.channel:sendMessage("I would not do this here or there.")
+		return
+	elseif arg ~= "" then
+		for user in message.guild.members do
+			if user.username == arg or user.name == arg then
+				target = message.guild.id .. "-" .. user.id
+				break
+			end
+		end
+	end
+
+	local rSize = math.random(20, 30)
+	local markovText = markov.generateText("./markovs/" .. target, rSize)
+
+	if markovText then
+		message.channel:sendMessage(markovText)
+	else
+		message.channel:sendMessage("I have not seen this person say anything yet.")
+	end
+end
+
 local function commandDie(message)
 	if not botAdmins[message.author.id] then
 		message.channel:sendMessage("You do not have permission to do this")
@@ -188,6 +225,7 @@ local commands = {	["&help"] = commandHelp,
 			["&say"] = commandSay,
 			["&sayy"] = commandSay, -- alias
 			["&roll"] = commandRoll,
+			["&markov"] = commandMarkov,
 			["&die"] = commandDie}
 
 local function messageGrabs(message)
@@ -208,6 +246,11 @@ local function messageGrabs(message)
 	if commands[command] then
 		message.channel:broadcastTyping()
 		commands[command](message)
+	else
+		-- Log user messages for the markov chains, stored by server and id
+		local file = assert(io.open("./markovs/" .. message.guild.id .. "-" .. message.author.id, "a"))
+		file:write("\n" .. message.content)
+		file:close()
 	end
 
 	if string.find(string.lower(message.content), "%f[%w]nico%f[^%w]") then
