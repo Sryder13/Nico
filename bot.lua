@@ -9,7 +9,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.9.1"
+local version = "v0.9.2"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -197,7 +197,7 @@ local function commandMarkov(message)
 	local rSize = math.random(20, 30)
 	local markovText = markov.generateText("./markovs/" .. target, rSize)
 
-	if markovText then
+	if markovText and markovText ~= "" then
 		message.channel:sendMessage(markovText)
 	else
 		message.channel:sendMessage("I have not seen this person say anything yet.")

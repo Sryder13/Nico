@@ -62,11 +62,14 @@ function M.generateText(fileName, size)
 		local i = 1
 		for k,_ in pairs(statetab) do
 			if i == startR then
-				w1, w2, w3 = string.match(k, "([^%s]+) ([^%s]+) ([^%s]+)")
+				w1, w2, w3 = string.match(k, "([^ ]+) ([^ ]+) ([^ ]+)")
 				break
 			end
 			i = i + 1
 		end
+
+		-- small hack, print at least word 3 so there is always something
+		text = w3 .. " "
 
 		for i=1,size,1 do
 			local list = statetab[prefix(w1, w2, w3)]
