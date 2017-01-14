@@ -9,7 +9,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.9.0"
+local version = "v0.9.1"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -249,7 +249,8 @@ local function messageGrabs(message)
 	else
 		-- Log user messages for the markov chains, stored by server and id
 		local file = assert(io.open("./markovs/" .. message.guild.id .. "-" .. message.author.id, "a"))
-		file:write("\n" .. message.content)
+		local addText = string.gsub(message.content, "`+.+`+", " ")
+		file:write("\n" .. addText)
 		file:close()
 	end
 

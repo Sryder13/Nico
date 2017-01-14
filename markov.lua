@@ -6,6 +6,9 @@ local function fileToWords(file)
 
 	local words = {}
 	for word in string.gmatch(data, "([^%s]+)") do
+		if string.find(word, "http://") or string.find(word, "https://") then
+			word = "<" .. word .. ">"
+		end
 		table.insert(words, word)
 	end
 	return words
@@ -59,7 +62,7 @@ function M.generateText(fileName, size)
 		local i = 1
 		for k,_ in pairs(statetab) do
 			if i == startR then
-				w1, w2, w3 = string.match(k, "(%g+) (%g+) (%g+)")
+				w1, w2, w3 = string.match(k, "([^%s]+) ([^%s]+) ([^%s]+)")
 				break
 			end
 			i = i + 1
