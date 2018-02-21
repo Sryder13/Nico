@@ -1,5 +1,7 @@
 local discordia = require("discordia")
-local client = discordia.Client()
+local client = discordia.Client {
+	cacheAllMembers = true,
+}
 
 local markov = require("markov")
 
@@ -9,7 +11,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.9.2"
+local version = "v0.10.0"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -23,7 +25,7 @@ My commands are:
 &randomuser - gives you a random user of the current server
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
-&roll <x> d<y> - roll x number of y sided dice
+&roll <x>d<y> - roll x number of y sided dice
 &markov [<user>] - generate markov chain over chat history for you or another user
 &die - stop the bot*
 
@@ -38,7 +40,7 @@ local botAdmins = {["127036555159273472"] = true, ["116883900688629761"] = true}
 local function die()
 	-- I don't think there's a way to instantly have it log out with this...
 	-- So this'll set it to be Idle while it's dead
-	client:setStatusIdle()
+	client:setStatus("idle")
 	client:stop(true)
 end
 
@@ -51,7 +53,11 @@ end
 ---------- COMMANDS ----------
 
 local function commandHelp(message)
-	message.channel:sendMessage(helptext)
+	message.channel:send(helptext)
+end
+
+local function isBotAdmin(user)
+	return botAdmins[user.id]
 end
 
 local function commandInfo(message)
@@ -62,25 +68,26 @@ I am version: ]] .. version
 
 	if message.guild then
 		text = text .. "\nMy admins in this server are: "
-		for user in message.guild.members do
-			if botAdmins[user.id] then
-				if i > 0 then
-					text = text .. ", "
-				end
-				text = text .. user.name .. " (" .. user.username .. "#" .. user.discriminator .. ")"
-				i = i + 1
+		for user in message.guild.members:findAll(isBotAdmin) do
+			if i > 0 then
+				text = text .. ", "
 			end
+			text = text .. user.name .. " (" .. user.username .. "#" .. user.discriminator .. ")"
+			i = i + 1
 		end
 	end
-	message.channel:sendMessage(text)
+	message.channel:send(text)
 end
 
 local function commandSource(message)
-	message.channel:sendMessage("My source is located at: <https://github.com/Sryder13/Nico>")
+	message.channel:send("My source is located at: <https://github.com/Sryder13/Nico>")
 end
 
 local function commandWhoIs(message)
-	local command, arg = string.lower(string.match(message.content, "(%g+) (.+)"))
+	local command, arg = string.match(message.content, "(%g+) (.+)")
+	if commnd then
+		command = string.lower(command)
+	end
 	local checkUser
 
 	if command == "&whoami" or not arg or not message.guild then
@@ -88,7 +95,7 @@ local function commandWhoIs(message)
 	end
 
 	if not checkUser then -- we aren't just using the author so go through guild
-		for user in message.guild.members do
+		for user in message.guild.members:iter() do
 			if user.username == arg or user.name == arg then
 				checkUser = user
 				break
@@ -99,30 +106,30 @@ local function commandWhoIs(message)
 		local text = "User: `" .. checkUser.username .. "#" .. checkUser.discriminator .. "`\n"
 		.. "ID: `"  .. checkUser.id .. "`\n"
 		.. "Account Created: `" .. simpleDiscordTime(checkUser.timestamp) .. "`"
-		message.channel:sendMessage(text)
+		message.channel:send(text)
 		return
 	end
 
-	message.channel:sendMessage("I can't find " .. arg)
+	message.channel:send("I can't find " .. arg)
 end
 
 local function commandRandomUser(message)
-	local i = 0
 	local text = "Your random user is: "
 	if not message.channel.guild then
-		message.channel:sendMessage("This does not work for PM's silly.")
+		message.channel:send("This does not work for PM's silly.")
 		return
 	end
-	local userNum = math.random(message.channel.guild.memberCount)-1
-	for user in message.guild.members do
+	local userNum = math.random(message.channel.guild.totalMemberCount)-1
+	local i = 0
+	for user in message.guild.members:iter() do
 		if i == userNum then
 			text = text .. user.name
 			break
 		end
-	i = i + 1
+		i = i + 1
 	end
 
-	message.channel:sendMessage(text)
+	message.channel:send(text)
 end
 
 local function commandSay(message)
@@ -134,23 +141,23 @@ local function commandSay(message)
 	if message.guild then
 		message:delete()
 	end
-	message.channel:sendMessage(text)
+	message.channel:send(text)
 end
 
 local function commandRoll(message)
 	local num, sides
-	num, sides = string.match(message.content, "%g+ (%d+) d(%d+)")
+	num, sides = string.match(message.content, "%g+ (%d+)d(%d+)")
 	-- convert them to numbers
 	num = tonumber(num)
 	sides = tonumber(sides)
-	if not num or not sides or sides == 0 then
-		message.channel:sendMessage("You did something wrong")
+	if not num or not sides or sides <= 0 then
+		message.channel:send("You did something wrong")
 		return
 	end
 
 	-- It just adds up and formats the output text
 	local die
-	local text = "Rolling " .. num .. " number of " .. sides .. " sided dice:\n"
+	local text = "Rolling " .. num .. " " .. sides .. " sided dice:\n"
 	local total = 0
 	for i = 0, num-1, 1 do
 		die = math.random(sides)
@@ -167,30 +174,36 @@ local function commandRoll(message)
 	else
 		text = text .. "Result is: " .. total
 	end
-	message.channel:sendMessage(text)
+	message.channel:send(text)
 end
 
 local function commandMarkov(message)
 	if not message.channel.guild then
-		message.channel:sendMessage("This does not work for PM's silly.")
+		message.channel:send("This does not work for PM's silly.")
 		return
 	end
 
 	-- arg is the name that was sent in
 	-- target is the server ID + "-" + user ID
 	local arg = string.match(message.content, "%g+ (.+)")
-	local target = message.guild.id .. "-" .. message.author.id
+	local target
 	local file
 
 	if arg == "Nico" then
-		message.channel:sendMessage("I would not do this here or there.")
+		message.channel:send("I would not do this here or there.")
 		return
-	elseif arg ~= "" then
-		for user in message.guild.members do
+	elseif arg == "" then
+		target = message.guild.id .. "-" .. message.author.id
+	else
+		for user in message.guild.members:iter() do
 			if user.username == arg or user.name == arg then
 				target = message.guild.id .. "-" .. user.id
 				break
 			end
+		end
+		if not target then
+			message.channel:send("I can't find this user.")
+			return
 		end
 	end
 
@@ -198,18 +211,18 @@ local function commandMarkov(message)
 	local markovText = markov.generateText("./markovs/" .. target, rSize)
 
 	if markovText and markovText ~= "" then
-		message.channel:sendMessage(markovText)
+		message.channel:send(markovText)
 	else
-		message.channel:sendMessage("I have not seen this person say anything yet.")
+		message.channel:send("I have not seen this person say anything yet.")
 	end
 end
 
 local function commandDie(message)
 	if not botAdmins[message.author.id] then
-		message.channel:sendMessage("You do not have permission to do this")
+		message.channel:send("You do not have permission to do this")
 		return
 	end
-	message.channel:sendMessage("Leaving on Command")
+	message.channel:send("Leaving on Command")
 	die()
 end
 
@@ -261,19 +274,13 @@ end
 
 local function startup()
 	-- Set the bot to be online
-	client:setStatusOnline()
+	client:setStatus("online")
 	-- Go to the dev bot channel and tell us you're alive
-	for server in client.guilds do
-		if server.id == "116884620032606215" then
-			for chan in server.textChannels do
-				if chan.id == "202806212599873536" then
-					chan:sendMessage("All wound up and ready to go.")
-				end
-			end
-		end
-	end
+	local homeServer = client.guilds:get("116884620032606215")
+	local devChannel = homeServer.textChannels:get("202806212599873536")
+	devChannel:send("All wound up and ready to go.")
 	-- Set "game playing" to version number
-	client:setGameName(version)
+	client:setGame(version)
 end
 
 client:on("ready", startup) -- event for first joining
