@@ -5,13 +5,13 @@ local client = discordia.Client {
 
 local markov = require("markov")
 
--- secret.lua should contain "return {token = "TOKEN"}"
+-- secret.lua should contain "return {token = "Bot <TOKEN>"}"
 local secrets = require("secret")
 
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.10.0"
+local version = "v0.10.1"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -192,7 +192,7 @@ local function commandMarkov(message)
 	if arg == "Nico" then
 		message.channel:send("I would not do this here or there.")
 		return
-	elseif arg == "" then
+	elseif not arg or arg == "" then
 		target = message.guild.id .. "-" .. message.author.id
 	else
 		for user in message.guild.members:iter() do
