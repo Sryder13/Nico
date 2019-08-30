@@ -11,7 +11,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.10.1"
+local version = "v0.10.2"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -25,7 +25,7 @@ My commands are:
 &randomuser - gives you a random user of the current server
 &say - say something in the channel
 &sayy - say something a e s t h e t i c a l l y
-&roll <x>d<y> - roll x number of y sided dice
+&roll <x>d<y>[+/-<z>] - roll x number of y sided dice, with an optional modifier
 &markov [<user>] - generate markov chain over chat history for you or another user
 &die - stop the bot*
 
@@ -145,8 +145,9 @@ local function commandSay(message)
 end
 
 local function commandRoll(message)
-	local num, sides
+	local num, sides, modifier, modamount
 	num, sides = string.match(message.content, "%g+ (%d+)d(%d+)")
+	modifier, modamount = string.match(message.content, "%g+ %d+d%d+(%p)(%d+)")
 	-- convert them to numbers
 	num = tonumber(num)
 	sides = tonumber(sides)
@@ -159,21 +160,35 @@ local function commandRoll(message)
 	local die
 	local text = "Rolling " .. num .. " " .. sides .. " sided dice:\n"
 	local total = 0
+	
+	if num <= 20 then
+		text = text .. "`["
+	end
 	for i = 0, num-1, 1 do
 		die = math.random(sides)
-		if num > 1 and num <= 20 then
+		if num <= 20 then
 			if i > 0 then
-				text = text .. " + "
+				text = text .. ", "
 			end
 			text = text .. die
 		end
 		total = total + die
 	end
-	if num > 1 and num <= 20 then
-		text = text .. " = " .. total
-	else
-		text = text .. "Result is: " .. total
+	if num <= 20 then
+		text = text .. "]`\n"
 	end
+
+	-- having a modifier and a modifier amount means we add or subtract that to the total
+	modamount = tonumber(modamount)
+	if modifier and modamount and (modifier == '+' or modifier == '-') then
+		if modifier == '+' then
+			total = total + modamount
+		elseif modifier == '-' then
+			total = total - modamount
+		end
+		text = text .. "Modifier: " .. modifier .. modamount .. "\n"
+	end
+	text = text .. "Result is: " .. total
 	message.channel:send(text)
 end
 
