@@ -11,7 +11,7 @@ local secrets = require("secret")
 
 ---------- NEEDED STUFF ----------
 
-local version = "v0.10.2"
+local version = "v0.10.3"
 
 local helptext = [[I am a Discord bot written in Lua!
 
@@ -158,7 +158,14 @@ local function commandRoll(message)
 
 	-- It just adds up and formats the output text
 	local die
-	local text = "Rolling " .. num .. " " .. sides .. " sided dice:\n"
+	local text = message.author.name
+
+	if message.member ~= nil then
+		text = message.member.name
+	end
+
+	text = text .. " rolled " .. num .. " " .. sides .. " sided dice:\n" 
+	
 	local total = 0
 	
 	if num <= 20 then
